@@ -11,6 +11,7 @@ type ErrFunc func(error) bool
 type WorkerDebugFunc func(int, int)
 
 type Config struct {
+	Async   bool
 	Workers int
 
 	FeederFunc
@@ -32,7 +33,7 @@ func (c Config) Validate() error {
 
 type Task func(int, int, context.Context) error
 
-func RunSync(c Config) error {
+func Run(c Config) error {
 	if err := c.Validate(); err != nil {
 		return err
 	}
@@ -63,6 +64,8 @@ func RunSync(c Config) error {
 			}
 		}(i, c.ErrFunc)
 	}
-	wg.Wait()
+	if !c.Async {
+		wg.Wait()
+	}
 	return nil
 }
